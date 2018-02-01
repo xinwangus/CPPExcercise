@@ -5,8 +5,11 @@
  *
  * The following samples give valid inputs:
  *         P215/65R15/95H
+ *         P215/65R15 95H
  *         255/55R18/109W
+ *         255/55R18 109W
  *         P225/60R18/100H
+ *         P225/60R18 100H
  */
 #include <iostream>
 #include <sstream>
@@ -172,7 +175,7 @@ main ()
 		string tire;
 		string output;
 		cout << "Please input your tire type info: ";
-		cin >> tire;
+		getline(cin,tire);
 		if (!decodeTireType(tire, output)) {
 			cout << "decode failed" << endl;
 		} else {

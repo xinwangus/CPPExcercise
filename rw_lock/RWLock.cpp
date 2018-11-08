@@ -1,139 +1,6 @@
 #include <iostream>
 #include <unistd.h>
 #include "RWLock.h"
-/* 
- * Implementation of RW lock problem using std C++ 11.
- * more portable than using pthread.
- *
- * Notice, need unlock w/o lock protection. (TODO)
- */
-
-////////////////////////////////
-RWLock::RWLock():
-	reader_count(0),
-	writer_count(0),
-	counter_lock()
-{
-}
-
-RWLock::~RWLock()
-{
-}
-
-////////////////////////////////
-RWLockSync::RWLockSync()
-	:cv()
-{
-}
-
-RWLockSync::~RWLockSync()
-{
-}
-
-void RWLockSync::rd_lock_sync()
-{
-	std::unique_lock<std::mutex> lck(counter_lock);
-	while (writer_count > 0) {
-		cv.wait(lck);
-	}
-	reader_count++;
-	lck.unlock();
-}
-
-void RWLockSync::rd_unlock()
-{
-	bool notify = false;
-	std::unique_lock<std::mutex> lck(counter_lock);
-	if (reader_count > 0) {
-		reader_count--;
-	}
-	if (reader_count == 0) {
-		notify = true;
-	}
-	lck.unlock();
-	if (notify) {
-		cv.notify_all();
-	}
-}
-
-void RWLockSync::wt_lock_sync()
-{
-        std::unique_lock<std::mutex> lck(counter_lock);
-        while (writer_count > 0 ||
-	       reader_count > 0) {
-                cv.wait(lck);
-        }
-        writer_count++;
-	lck.unlock();
-}
-
-void RWLockSync::wt_unlock()
-{       
-	bool notify = false;
-	std::unique_lock<std::mutex> lck(counter_lock);
-        if (writer_count > 0) {
-                writer_count--;
-        }
-        if (writer_count == 0) {
-                notify = true;
-        } 
-	lck.unlock();
-	if (notify) {
-		cv.notify_all();
-	}
-}
-
-////////////////////////////////
-RWLockAsync::RWLockAsync()
-{
-}
-
-RWLockAsync::~RWLockAsync()
-{
-}
-
-bool RWLockAsync::rd_lock_async()
-{
-	bool locked = false;
-	counter_lock.lock();
-        if (writer_count == 0) {
-        	reader_count++;
-		locked = true;
-	}
-	counter_lock.unlock();
-	return locked;
-}
-
-void RWLockAsync::rd_unlock()
-{
-	counter_lock.lock();
-        if (reader_count > 0) {
-                reader_count--;
-        }
-	counter_lock.unlock();
-}
-
-bool RWLockAsync::wt_lock_async()
-{
-	bool locked = false;
-	counter_lock.lock();
-        if (writer_count == 0 &&
-            reader_count == 0) {
-        	writer_count++;
-		locked = true;
-	}
-	counter_lock.unlock();
-	return locked;
-}
-
-void RWLockAsync::wt_unlock()
-{
-	counter_lock.lock();
-        if (writer_count > 0) {
-                writer_count--;
-        }
-	counter_lock.unlock();
-}
 
 //////////////////////////////////////
 // Test code
@@ -146,30 +13,27 @@ void sync_thread_fn (unsigned int id)
 {
 	int i = 0;
 	bool reader = ((id % 2) > 0);
-	RWLockSync* rwlock = (RWLockSync*)&my_sync_rw_lock;
 	cout_lock.lock();
 	cout << "sync_thread_fn id " << id << ((reader)? " Reader ": " Writer ") << "runnning" << endl;
 	cout_lock.unlock();
 	while (i++ < 10) {
 		if (reader) {
-			rwlock->rd_lock_sync();
+			RWSyncLockReadScope((RWLockSync*)&my_sync_rw_lock);
 			sleep(1);
 			cout_lock.lock();
 			cout << "sync rd thread " << id << " sync locked, i = " << i << endl;
 			cout << "sync rd thread " << id << " do read, i = " << i << endl;
 			cout << "sync rd thread " << id << " sync unlocked, i = " << i << endl;
 			cout_lock.unlock();
-			rwlock->rd_unlock();
 			sleep(1);
 		} else {
-			rwlock->wt_lock_sync();
+			RWSyncLockWriteScope((RWLockSync*)&my_sync_rw_lock);
 			sleep(2);
 			cout_lock.lock();
 			cout << "sync wt thread " << id << " sync locked, i = " << i << endl;
 			cout << "sync wt thread " << id << " do write, i = " << i << endl;
 			cout << "sync wt thread " << id << " sync unlocked, i = " << i << endl;
 			cout_lock.unlock();
-			rwlock->wt_unlock();
 			sleep(2);
 		}
 	}

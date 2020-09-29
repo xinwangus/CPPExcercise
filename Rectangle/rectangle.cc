@@ -70,16 +70,12 @@ int main ()
 	Range y1(2,6);
 	Range x2(3,7);
 	Range y2(1,5);
-
-	Rectangle* r1 = new Rectangle(x1, y1);
-	Rectangle* r2 = new Rectangle(x2, y2);
-	
 	Range xo(0,0);
 	Range yo(0,0);
 
-	bool overlap = r1->x.overlap(r2->x, xo);
+	bool overlap = x1.overlap(x2, xo);
 	if (overlap) {
-		overlap = r1->y.overlap(r2->y, yo);
+		overlap = y1.overlap(y2, yo);
 		if (overlap) {
 			Rectangle* ol = new Rectangle(xo, yo);
 			cout << "overlap area X range is: (" << xo.s << " , " << xo.l << ")" << endl;

@@ -3,8 +3,8 @@
 
 using namespace std;
 
-#define MAX(a, b) ((a > b)? a : b)
-#define MIN(a, b) ((a > b)? b : a)
+#define MAX(a, b) (((a) > (b))? (a) : (b))
+#define MIN(a, b) (((a) > (b))? (b) : (a))
 
 class Range {
 public:
@@ -30,15 +30,14 @@ Range::~Range()
 bool 
 Range::overlap(const Range& in, Range&out)
 {
-	bool ret = false;
-	if ((l <= in.s) || (s >= in.l)) {
-		return ret;
+	int ss = MAX(s, in.s);
+	int ll = MIN(l, in.l);
+	if (ss >= ll) {
+		return false;
 	}
-	ret = true;
-	out.s = MAX(s, in.s);
-	out.l = MIN(l, in.l);
-	assert(out.s <= out.l);
-	return ret;
+	out.s = ss;
+	out.l = ll;
+	return true;
 }
 
 class Rectangle {

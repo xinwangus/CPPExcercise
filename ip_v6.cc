@@ -4,7 +4,7 @@
  */
 #include <stdio.h>
 
-typedef char uint8_t;
+typedef unsigned char uint8_t;
 
 void print_short(unsigned short d)
 {
@@ -38,7 +38,7 @@ void print_ipv6 (uint8_t ip[])
 
 	if (is_v4) {
 		printf ("\n%hu.%hu.%hu.%hu\n", 
-		        (uint8_t)ip[12] & 0xFF, // strange?
+		        (uint8_t)ip[12],
 			(uint8_t)ip[13],
 		        (uint8_t)ip[14],
 			(uint8_t)ip[15]);

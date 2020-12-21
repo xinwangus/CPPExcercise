@@ -8,15 +8,7 @@ typedef unsigned char uint8_t;
 
 void print_short(unsigned short d)
 {
-	if ((d & 0xF) == d) {
-		printf ("%01x", d);
-	} else if ((d & 0xFF) == d) {
-		printf ("%02x", d);
-	} else if ((d & 0xFFF) == d) {
-		printf ("%03x", d);
-	} else {
-		printf ("%04x", d);
-	}
+	printf ("%x", d);
 }
 
 void print_ipv6 (uint8_t ip[])

@@ -33,7 +33,7 @@ bool smallest_greater(unsigned int a, unsigned int& out)
 		dq.pop_back();
 		if (v >= maxv) {
 			// we need to continue move forward
-			if (v > maxv) maxv = v;
+			maxv = v;
 			ms.insert(v);
 		} else {
 			// find our spot, we can stop as we have
@@ -44,7 +44,7 @@ bool smallest_greater(unsigned int a, unsigned int& out)
 			ms.erase(itr);
 
 			ms.insert(v);
-			break;
+			break; // done!
 		}
 	}
 
@@ -57,10 +57,9 @@ bool smallest_greater(unsigned int a, unsigned int& out)
 	// Now combination of the two structures
 	// should be our answer.
 	out = 0;
-	while (!dq.empty()) {
+	for (auto& item : dq) {
 		out *= 10;
-		out += dq.front();
-		dq.pop_front();
+		out += item;
 	}
 	for (auto& item : ms) {
 		out *= 10;

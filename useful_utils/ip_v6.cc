@@ -17,7 +17,7 @@ void print_ipv6 (uint8_t ip[])
 
 	unsigned short word[8] = {0};
 
-	// combine to hexdecimal
+	// step 1: combine to word
 	for (int i = 0; i < 16; ++i) {
 		if ((i % 2) == 0) {
 			word[i/2] |= (unsigned short)(ip[i] << 8);
@@ -26,6 +26,7 @@ void print_ipv6 (uint8_t ip[])
 		}
 	}
 
+	// step 2: take care of v4 address
 	if (word[5] == 0xFFFF) { is_v4 = true; }
 
 	if (is_v4) {
@@ -35,15 +36,16 @@ void print_ipv6 (uint8_t ip[])
 		        (uint8_t)ip[14],
 			(uint8_t)ip[15]);
 	} else {
+		// Step 3:
 		// ip v6
 		// find the largest all 0 range in word
+
+		// start's being -1, meaning not tracking
+		// 0 at this moment.
+		// b_*** are for the biggest.
 		int start, b_start = -1;
 		int len, b_len = 0;
 		for (int j = 0; j < 8; ++j) {
-/*
-			print_short(word[j]);
-			if (j != 7) { printf(":"); }
-*/
 			if (word[j] == 0) {
 				if (start == -1) {
 					start = j;
@@ -52,6 +54,7 @@ void print_ipv6 (uint8_t ip[])
 					len++;
 				}
 			} else {
+				// close of track range
 				if (len > b_len) {
 					b_start = start;
 					b_len = len;
@@ -61,12 +64,9 @@ void print_ipv6 (uint8_t ip[])
 			}
 		}
 
-		/*
-		printf("\nb_start = %u\n", b_start);
-		printf("b_len = %u\n", b_len);
-		 */
 		printf("\n");
 
+		// Step 4: formatting
 		for (int j = 0; j < 8; ++j) {
 			if ((j < b_start) ||
                             (j > (b_start + b_len - 1))) {
